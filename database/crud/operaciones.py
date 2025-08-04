@@ -156,3 +156,24 @@ def obtener_operacion_completa(no_solicitud):
             "ventas": [dict(v) for v in ventas],
             "costos": [dict(c) for c in costos]
         }
+    
+def obtener_ventas_por_solicitud(no_solicitud: str):
+    with SessionLocal() as db:
+        query = text("""
+            SELECT v.id_venta, v.cliente, v.concepto, v.monto, v.moneda
+            FROM ventas v
+            JOIN operaciones o ON o.id_operacion = v.id_operacion
+            WHERE o.no_solicitud = :no_solicitud
+        """)
+        rows = db.execute(query, {"no_solicitud": no_solicitud}).mappings().all()
+        return [dict(row) for row in rows]
+
+def obtener_notas_credito_por_venta(id_venta: int):
+    with SessionLocal() as db:
+        query = text("""
+            SELECT * FROM notas_credito WHERE id_venta = :id_venta
+        """)
+        result = db.execute(query, {"id_venta": id_venta}).mappings().all()
+        return [dict(r) for r in result]
+
+

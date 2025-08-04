@@ -135,10 +135,8 @@ def register_new_client(client_name, clients_list):
 
 def save_order_submission(order_info: dict, sheet_name: str):
     headers = [
-        "Comercial", "Fecha", "No Solicitud", "Datos Cliente",
-        "BL/AWB", "Shipper", "Consignee", "Ruta (POL -> POD)", "Referencia",
-        "Tipo Carga", "Detalles de la Carga",
-        "Recargos", "Totales", "Comentarios Finales"
+        "Comercial", "Fecha", "No Solicitud", "Cliente", "Ruta (POL -> POD)", "Referencia",
+        "Totales", "Comentarios Finales"
     ]
 
     worksheet = get_or_create_worksheet_orden(sheet_name, headers)
@@ -153,49 +151,17 @@ def save_order_submission(order_info: dict, sheet_name: str):
         # --- Datos del cliente (dentro de venta) ---
         venta_data = order_info.get("venta", {})
         datos_cliente = (
-            f"Nombre: {venta_data.get('cliente', '')}\n"
-            f"Teléfono: {venta_data.get('customer_phone', '')}\n"
-            f"Dirección: {venta_data.get('customer_address', '')}\n"
-            f"Cuenta: {venta_data.get('customer_account', '')}\n"
-            f"NIT: {venta_data.get('customer_nit', '')}\n"
-            f"Contacto: {venta_data.get('customer_contact', '')}\n"
-            f"Email: {venta_data.get('customer_email', '')}\n"
+            f"{venta_data.get('cliente', '')}"
         )
 
         # --- Datos de la carga ---
         carga = order_info.get("carga", {})
-        bl_awb = carga.get("bl_awb", "")
-        shipper = carga.get("shipper", "")
-        consignee = carga.get("consignee", "")
         ruta = f"{carga.get('pol_aol', '')} -> {carga.get('pod_aod', '')}"
         reference = carga.get("reference", "")
-        cargo_type = carga.get("cargo_type", "")
-        container_details = carga.get("container_details", {})
-        unidad_medida = carga.get("unidad_medida", "")
-        cantidad_suelta = carga.get("cantidad_suelta", "")
-
-        if container_details:
-            carga_lines = []
-            for c_type, details in container_details.items():
-                for name in details.get("names", []):
-                    carga_lines.append(f"{c_type}: {name}")
-            carga_str = '\n'.join(carga_lines)
-        else:
-            carga_str = f"{cantidad_suelta} {unidad_medida}"
 
         # --- Recargos ---
         sales_surcharges = venta_data.get("sales_surcharges", [])
         cost_surcharges = order_info.get("cost_surcharges", [])
-
-        surcharge_lines = []
-        recargos = sales_surcharges if sheet_name.upper() == "VENTA" else cost_surcharges
-        for s in recargos:
-            total = s.get("total", 0.0)
-            currency = s.get("currency", "")
-            surcharge_lines.append(
-                f"{s.get('concept', '')}: {s.get('quantity', 0)} × {s.get('rate', 0)} = {total:.2f} {currency}"
-            )
-        surcharge_str = '\n'.join(surcharge_lines)
 
         # --- Totales ---
         if sheet_name.upper() == "VENTA":
@@ -223,10 +189,7 @@ def save_order_submission(order_info: dict, sheet_name: str):
 
         # --- Fila final ---
         row = [
-            commercial, timestamp, no_solicitud, datos_cliente,
-            bl_awb, shipper, consignee, ruta, reference,
-            cargo_type, carga_str,
-            surcharge_str, total_str,
+            commercial, timestamp, no_solicitud, datos_cliente, ruta, reference, total_str,
             comentarios
         ]
 
