@@ -52,3 +52,13 @@ CREATE TABLE IF NOT EXISTS notas_credito (
     valor_nc DECIMAL(12, 2) DEFAULT 0,
     id_venta INT REFERENCES ventas(id_venta) ON DELETE CASCADE           -- Valor de la nota crédito
 );
+
+CREATE TABLE clientes (
+    id_cliente SERIAL PRIMARY KEY,
+    cliente TEXT NOT NULL,
+    nit TEXT,
+    direccion TEXT,
+    telefono_contacto TEXT,
+    correo TEXT,
+    pais TEXT
+);
