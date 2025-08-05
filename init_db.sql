@@ -49,5 +49,6 @@ CREATE TABLE IF NOT EXISTS notas_credito (
     id_operacion INT NOT NULL REFERENCES operaciones(id_operacion) ON DELETE CASCADE,
     no_factura VARCHAR(50) NOT NULL,            -- Número de factura
     tipo_nc VARCHAR(50) NOT NULL,               -- Tipo de nota crédito (Valor Parcial / Valor Total)
-    valor_nc DECIMAL(12, 2) DEFAULT 0           -- Valor de la nota crédito
+    valor_nc DECIMAL(12, 2) DEFAULT 0,
+    id_venta INT REFERENCES ventas(id_venta) ON DELETE CASCADE           -- Valor de la nota crédito
 );
