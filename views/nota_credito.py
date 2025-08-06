@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 from database.crud.operaciones import (
     obtener_ventas_por_solicitud,
     obtener_notas_credito_por_venta
@@ -11,7 +12,6 @@ def show():
     no_solicitud = st.text_input("Ingrese Número de Solicitud*", key="nc_no_solicitud")
 
     if no_solicitud:
-        # Ahora trae ventas_master
         ventas = obtener_ventas_por_solicitud(no_solicitud)
 
         if not ventas:
@@ -20,16 +20,28 @@ def show():
 
         st.subheader("Ventas Asociadas")
 
+        # Lista acumuladora para la tabla final
+        notas_credito_global = []
+
         for v_idx, venta in enumerate(ventas):
             id_venta_master = venta["id_venta_master"]
-            monto_venta = venta["monto_total"]  # nuevo nombre
+            monto_venta = venta["monto_total"]
             moneda = venta["moneda"]
             cliente = venta["cliente"]
 
-            # Obtener notas crédito para la venta completa
             notas = obtener_notas_credito_por_venta(id_venta_master)
             total_nc = sum(n["valor_nc"] for n in notas)
             open_balance = float(monto_venta) - float(total_nc)
+
+            # Agregar estas notas a la lista global
+            for n in notas:
+                notas_credito_global.append({
+                    "Venta #": id_venta_master,
+                    "Cliente": cliente,
+                    "Factura": n["no_factura"],
+                    "Valor": n["valor_nc"],
+                    "Razón": n.get("razon", "")
+                })
 
             with st.expander(f"**Venta #{v_idx+1} - {cliente}**"):
 
@@ -94,7 +106,15 @@ def show():
                             tipo_nc=tipo_nc,
                             valor_nc=valor_nc,
                             razon=razon,
-                            id_venta_master=id_venta_master  # nuevo campo
+                            id_venta_master=id_venta_master
                         )
                         st.success("✅ Nota crédito registrada correctamente.")
                         st.rerun()
+
+        # Mostrar tabla de todas las notas crédito registradas
+        if notas_credito_global:
+            st.markdown("### 📋 Notas Crédito Registradas")
+            df_nc = pd.DataFrame(notas_credito_global)
+            st.dataframe(df_nc, use_container_width=True)
+        else:
+            st.info("No hay notas crédito registradas para estas ventas.")
