@@ -119,6 +119,64 @@ def guardar_operacion_completa(operacion, carga, ventas, costos):
             db.rollback()
             raise RuntimeError(f"Error al guardar la operación: {e}")
 
+
+def obtener_operacion_completa(no_solicitud):
+    """
+    Devuelve toda la información de una operación:
+    - Datos generales de la operación.
+    - Información de la carga (con 'detalle' convertido de JSON a dict).
+    - Ventas asociadas.
+    - Costos asociados.
+    """
+    with SessionLocal() as db:
+        # --- 1. Obtener operación ---
+        query_operacion = text("""
+            SELECT * FROM operaciones WHERE no_solicitud = :no_solicitud
+        """)
+        operacion = db.execute(query_operacion, {"no_solicitud": no_solicitud}).mappings().first()
+
+        if not operacion:
+            return None  # No existe la operación
+
+        id_operacion = operacion["id_operacion"]
+
+        # --- 2. Obtener carga ---
+        query_carga = text("""
+            SELECT * FROM cargas WHERE id_operacion = :id_operacion
+        """)
+        carga = db.execute(query_carga, {"id_operacion": id_operacion}).mappings().first()
+
+        # Deserializar detalle JSONB
+        if carga and carga.get("detalle"):
+            if isinstance(carga["detalle"], str):  # Solo deserializar si es string
+                try:
+                    carga = dict(carga)
+                    carga["detalle"] = json.loads(carga["detalle"])
+                except json.JSONDecodeError:
+                    carga["detalle"] = {}
+            else:
+                carga = dict(carga)  # Ya es dict
+
+        # --- 3. Obtener ventas ---
+        query_ventas = text("""
+            SELECT * FROM ventas WHERE id_operacion = :id_operacion
+        """)
+        ventas = db.execute(query_ventas, {"id_operacion": id_operacion}).mappings().all()
+
+        # --- 4. Obtener costos ---
+        query_costos = text("""
+            SELECT * FROM costos WHERE id_operacion = :id_operacion
+        """)
+        costos = db.execute(query_costos, {"id_operacion": id_operacion}).mappings().all()
+
+        return {
+            "operacion": dict(operacion),
+            "carga": dict(carga) if carga else {},
+            "ventas": [dict(v) for v in ventas],
+            "costos": [dict(c) for c in costos]
+        }
+
+
 def obtener_ventas_por_solicitud(no_solicitud: str, incluir_detalles: bool = False):
     """
     Obtiene las ventas consolidadas (ventas_master) para una solicitud.
@@ -159,3 +217,6 @@ def obtener_notas_credito_por_venta(id_venta_master: int):
         """)
         result = db.execute(query, {"id_venta_master": id_venta_master}).mappings().all()
         return [dict(r) for r in result]
+
+
+
