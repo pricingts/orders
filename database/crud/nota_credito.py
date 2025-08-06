@@ -2,10 +2,10 @@ from sqlalchemy import text
 from database.db import SessionLocal
 from services.sheets_writer import save_nota_credito, delete_nota_credito_sheet
 
-def insertar_nota_credito(no_solicitud: str, no_factura: str, tipo_nc: str, valor_nc: float, razon: str, id_venta: int):
+def insertar_nota_credito(no_solicitud: str, no_factura: str, tipo_nc: str, valor_nc: float, razon: str, id_venta_master: int):
     """
-    Inserta una nueva nota de crédito asociada a una operación (no_solicitud) y a una venta (id_venta),
-    y la guarda también en Google Sheets.
+    Inserta una nueva nota de crédito asociada a una operación (no_solicitud)
+    y a una venta consolidada (id_venta_master), y la guarda también en Google Sheets.
     """
     with SessionLocal() as db:
         try:
@@ -21,15 +21,15 @@ def insertar_nota_credito(no_solicitud: str, no_factura: str, tipo_nc: str, valo
 
             id_operacion = result[0]
 
-            # 2. Insertar en notas_credito
+            # 2. Insertar en notas_credito usando id_venta_master
             query_insert = text("""
-                INSERT INTO notas_credito (id_operacion, id_venta, no_factura, tipo_nc, valor_nc, razon)
-                VALUES (:id_operacion, :id_venta, :no_factura, :tipo_nc, :valor_nc, :razon)
+                INSERT INTO notas_credito (id_operacion, id_venta_master, no_factura, tipo_nc, valor_nc, razon)
+                VALUES (:id_operacion, :id_venta_master, :no_factura, :tipo_nc, :valor_nc, :razon)
                 RETURNING id_nc
             """)
             new_id = db.execute(query_insert, {
                 "id_operacion": id_operacion,
-                "id_venta": id_venta,
+                "id_venta_master": id_venta_master,
                 "no_factura": no_factura,
                 "tipo_nc": tipo_nc,
                 "valor_nc": valor_nc,
@@ -42,7 +42,7 @@ def insertar_nota_credito(no_solicitud: str, no_factura: str, tipo_nc: str, valo
             save_nota_credito({
                 "id_nc": new_id,
                 "no_solicitud": no_solicitud,
-                "id_venta": id_venta,
+                "id_venta_master": id_venta_master,
                 "no_factura": no_factura,
                 "tipo_nc": tipo_nc,
                 "valor_nc": valor_nc,
@@ -52,7 +52,6 @@ def insertar_nota_credito(no_solicitud: str, no_factura: str, tipo_nc: str, valo
         except Exception as e:
             db.rollback()
             raise RuntimeError(f"Error al insertar la nota de crédito: {e}")
-
 
 
 def obtener_notas_credito(no_solicitud: str):
@@ -87,4 +86,3 @@ def eliminar_nota_credito(id_nc: int):
         except Exception as e:
             db.rollback()
             raise RuntimeError(f"Error al eliminar la nota de crédito: {e}")
-

@@ -11,6 +11,7 @@ def show():
     no_solicitud = st.text_input("Ingrese Número de Solicitud*", key="nc_no_solicitud")
 
     if no_solicitud:
+        # Ahora trae ventas_master
         ventas = obtener_ventas_por_solicitud(no_solicitud)
 
         if not ventas:
@@ -20,12 +21,13 @@ def show():
         st.subheader("Ventas Asociadas")
 
         for v_idx, venta in enumerate(ventas):
-            id_venta = venta["id_venta"]
-            monto_venta = venta["monto"]
+            id_venta_master = venta["id_venta_master"]
+            monto_venta = venta["monto_total"]  # nuevo nombre
             moneda = venta["moneda"]
             cliente = venta["cliente"]
 
-            notas = obtener_notas_credito_por_venta(id_venta)
+            # Obtener notas crédito para la venta completa
+            notas = obtener_notas_credito_por_venta(id_venta_master)
             total_nc = sum(n["valor_nc"] for n in notas)
             open_balance = float(monto_venta) - float(total_nc)
 
@@ -33,24 +35,24 @@ def show():
 
                 col1, col2, col3 = st.columns(3)
                 with col1:
-                    st.markdown(f"**Notas Crédito registradas**:")
+                    st.markdown("**Notas Crédito registradas:**")
                     st.markdown(f"{len(notas)}")
                 
                 with col2:
-                    st.markdown(f"**Total Original**:")
+                    st.markdown("**Total Original:**")
                     st.markdown(f"{monto_venta:.2f} {moneda}")
                 
                 with col3:
-                    st.markdown(f"**Saldo Disponible**:")
+                    st.markdown("**Saldo Disponible:**")
                     st.markdown(f"{open_balance:.2f} {moneda}")
 
                 col4, col5, col6, col7 = st.columns(4)
 
                 with col4:
-                    no_factura = st.text_input("Número de Factura*", key=f"factura_{id_venta}")
+                    no_factura = st.text_input("Número de Factura*", key=f"factura_{id_venta_master}")
 
                 with col5:
-                    tipo_nc = st.selectbox("Tipo de Nota Crédito", ["Valor Parcial", "Valor Total"], key=f"tipo_nc_{id_venta}")
+                    tipo_nc = st.selectbox("Tipo de Nota Crédito", ["Valor Parcial", "Valor Total"], key=f"tipo_nc_{id_venta_master}")
 
                 with col6:
                     if tipo_nc == "Valor Total":
@@ -59,7 +61,7 @@ def show():
                             "Valor de la Nota Crédito*",
                             value=valor_nc,
                             disabled=True,
-                            key=f"valor_nc_{id_venta}"
+                            key=f"valor_nc_{id_venta_master}"
                         )
                     else:
                         valor_nc = st.number_input(
@@ -67,7 +69,7 @@ def show():
                             min_value=0.0,
                             max_value=float(open_balance),
                             step=0.01,
-                            key=f"valor_nc_{id_venta}"
+                            key=f"valor_nc_{id_venta_master}"
                         )
                 with col7:
                     razones_opciones = [
@@ -76,9 +78,9 @@ def show():
                         "NO ENTRO EN EL CIERRE DE MES",
                         "FALTO PO"
                     ]
-                    razon = st.selectbox("Razón de la Nota Crédito*", razones_opciones, key=f"razon_nc_{id_venta}")
+                    razon = st.selectbox("Razón de la Nota Crédito*", razones_opciones, key=f"razon_nc_{id_venta_master}")
 
-                if st.button("💾 Guardar Nota Crédito", key=f"guardar_nc_{id_venta}"):
+                if st.button("💾 Guardar Nota Crédito", key=f"guardar_nc_{id_venta_master}"):
                     if not no_factura:
                         st.warning("⚠️ Debes ingresar el número de factura.")
                     elif valor_nc <= 0:
@@ -92,8 +94,7 @@ def show():
                             tipo_nc=tipo_nc,
                             valor_nc=valor_nc,
                             razon=razon,
-                            id_venta=id_venta
+                            id_venta_master=id_venta_master  # nuevo campo
                         )
                         st.success("✅ Nota crédito registrada correctamente.")
                         st.rerun()
-
