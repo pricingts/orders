@@ -115,7 +115,7 @@ def cargar_operacion_en_formulario(no_solicitud):
     Carga en st.session_state todos los datos relacionados a una operación existente:
     - Datos de la operación (comercial, comentarios)
     - Datos de la carga (BL/AWB, shipper, consignee, contenedores o carga suelta)
-    - Ventas (sales_blocks)
+    - Ventas (sales_blocks) desde ventas_master y ventas_detalle
     - Costos (cost_surcharges)
     """
     datos_previos = obtener_operacion_completa(no_solicitud)
@@ -124,7 +124,7 @@ def cargar_operacion_en_formulario(no_solicitud):
 
     operacion = datos_previos.get("operacion", {})
     carga = datos_previos.get("carga", {})
-    ventas = datos_previos.get("ventas", [])
+    ventas = datos_previos.get("ventas", [])  # ahora es ventas_master con detalles
     costos = datos_previos.get("costos", [])
 
     # --- Datos de la operación ---
@@ -176,36 +176,44 @@ def cargar_operacion_en_formulario(no_solicitud):
 
     return True
 
-def reconstruir_sales_blocks(ventas_db):
-    blocks = {}
-    for venta in ventas_db:
-        cliente = venta.get("cliente", "")
-        if cliente not in blocks:
-            blocks[cliente] = {
-                "client": cliente,
-                "sales_surcharges": [],
-                "comments": ""
-            }
-        blocks[cliente]["sales_surcharges"].append({
-            "concept": venta.get("concepto", ""),
-            "quantity": float(venta.get("cantidad", 0)),
-            "rate": float(venta.get("tarifa", 0)),
-            "total": float(venta.get("monto", 0)),
-            "currency": venta.get("moneda", "USD")
-        })
 
-        if venta.get("comentarios"):
-            blocks[cliente]["comments"] = venta.get("comentarios")
+def reconstruir_sales_blocks(ventas_master_db):
+    """
+    Reconstruye los bloques de venta a partir de la estructura nueva:
+    - ventas_master: info general
+    - detalles: lista de recargos (ventas_detalle)
+    """
+    blocks = []
+    for venta in ventas_master_db:
+        block = {
+            "id_venta_master": venta.get("id_venta_master"),  # para NC
+            "client": venta.get("cliente", ""),
+            "sales_surcharges": [],
+            "comments": venta.get("comentarios", "")
+        }
+        for detalle in venta.get("detalles", []):
+            block["sales_surcharges"].append({
+                "concept": detalle.get("concepto", ""),
+                "quantity": float(detalle.get("cantidad", 0)),
+                "rate": float(detalle.get("tarifa", 0)),
+                "total": float(detalle.get("monto", 0)),
+                "currency": detalle.get("moneda", "USD")
+            })
+        blocks.append(block)
+    return blocks
 
-    return list(blocks.values())
 
 def prepare_venta_data(venta_info: dict) -> dict:
+    """
+    Prepara la estructura de una venta para PDF o exportación.
+    """
     venta_data = venta_info.get("venta", {})
     carga_data = venta_info.get("carga", {})
 
     return {
         "no_solicitud": venta_info.get("no_solicitud", ""),
         "client": venta_data.get("cliente", ""),
+        "id_venta_master": venta_data.get("id_venta_master", None),
 
         # Recargos
         "sales_surcharges": venta_data.get("sales_surcharges", []),
@@ -223,7 +231,7 @@ def prepare_venta_data(venta_info: dict) -> dict:
         "unidad_medida": carga_data.get("unidad_medida", ""),
         "cantidad_suelta": carga_data.get("cantidad_suelta", 0),
 
-        # Datos de cliente (vienen dentro de "venta")
+        # Datos de cliente
         "customer_phone": venta_data.get("customer_phone", ""),
         "customer_address": venta_data.get("customer_address", ""),
         "customer_account": venta_data.get("customer_account", ""),
@@ -234,5 +242,3 @@ def prepare_venta_data(venta_info: dict) -> dict:
         # Comentarios finales
         "comentarios": venta_info.get("comentarios", ""),
     }
-
-
