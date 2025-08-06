@@ -464,18 +464,24 @@ def forms():
                 "referencia": reference
             }
 
+            # --- Nuevo armado de ventas_data ---
             ventas_data = []
             for block in st.session_state.get("sales_blocks", []):
+                venta_master = {
+                    "cliente": block["client"],
+                    "moneda": block["sales_surcharges"][0]["currency"] if block["sales_surcharges"] else "USD",
+                    "comentarios": block.get("comments", ""),
+                    "detalles": []
+                }
                 for surcharge in block["sales_surcharges"]:
-                    ventas_data.append({
-                        "cliente": block["client"],
+                    venta_master["detalles"].append({
                         "concepto": surcharge["concept"],
                         "cantidad": surcharge["quantity"],
                         "tarifa": surcharge["rate"],
                         "monto": surcharge["total"],
-                        "moneda": surcharge["currency"],
-                        "comentarios": block.get("comments", "") 
+                        "moneda": surcharge["currency"]
                     })
+                ventas_data.append(venta_master)
 
             costos_data = [
                 {
