@@ -71,8 +71,8 @@ def create_overlay(data: dict, overlay_path: str, surcharge_key: str = "sales_su
 
         c.setFont(FONT_REGULAR, 7)
         c.drawString(115, 583, data.get("client", "").upper())
-        c.drawString(170, 569, data.get("customer_account", "").upper())
-        c.drawString(95, 555, data.get("customer_nit", "").upper())
+        c.drawString(125, 569, data.get("customer_account", "").upper())
+        c.drawString(130, 555, data.get("customer_nit", "").upper())
         c.drawString(105, 540, data.get("customer_email", "").upper())
 
         address_text = data.get("customer_address", "").upper()
