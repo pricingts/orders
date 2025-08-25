@@ -113,7 +113,7 @@ def create_overlay(data, overlay_path):
     reference = data.get("reference", "")
 
     if reference.strip():
-        c.drawString(300, 546, f"Referencia de cliente: {reference}")
+        c.drawString(350, 546, f"Referencia de cliente: {reference}")
 
     table_data = []
     total_cost_by_currency = {}
@@ -142,7 +142,7 @@ def create_overlay(data, overlay_path):
         ('FONTNAME', (0,0), (-1,-1), 'OpenSauce'),
         ('ALIGN', (0,0), (-1,-1), 'CENTER'),
         ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-        ('FONTSIZE', (0,0), (-1,-1), 9),
+        ('FONTSIZE', (0,0), (-1,-1), 7),
         ('TOPPADDING', (0,0), (-1,-1), 3),
         ('BOTTOMPADDING', (0,0), (-1,-1), 5),
     ])

@@ -88,7 +88,9 @@ def show():
                         "CAMBIOS DE VENTA - COMERCIAL O CUSTOMER",
                         "CLIENTE SOLICITA FACTURAR A OTRA RAZON SOCIAL",
                         "NO ENTRO EN EL CIERRE DE MES",
-                        "FALTO PO"
+                        "FALTO PO",
+                        "FUE FACTURADOO CON OTRA M"
+                        "OTRO"
                     ]
                     razon = st.selectbox("Razón de la Nota Crédito*", razones_opciones, key=f"razon_nc_{id_venta_master}")
 
@@ -111,7 +113,6 @@ def show():
                         st.success("✅ Nota crédito registrada correctamente.")
                         st.rerun()
 
-        # Mostrar tabla de todas las notas crédito registradas
         if notas_credito_global:
             st.markdown("### 📋 Notas Crédito Registradas")
             df_nc = pd.DataFrame(notas_credito_global)

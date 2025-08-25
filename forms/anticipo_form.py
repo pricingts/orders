@@ -1,7 +1,7 @@
 import streamlit as st
 import math
 import pytz
-from ui.helpers import *
+# from utils.helpers import *
 
 colombia_timezone = pytz.timezone('America/Bogota')
 
@@ -57,7 +57,8 @@ def forms(clients_list):
             "Open Top 20'",
             "Open Top 40'",
             "Flat Rack 20'",
-            "Flat Rack 40'"]
+            "Flat Rack 40'",
+            'LCL']
 
         container_type= st.multiselect("Select Container Type(s)*", container_op, key='container_type')
         col4, col5, col6 = st.columns(3)

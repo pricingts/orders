@@ -445,55 +445,65 @@ def forms():
         for currency, amount in profit_totals.items():
             st.markdown(f"**Profit {currency}**: {amount:,.2f} {currency}")
 
-        if st.button("💾 Guardar Orden"):
-            operacion_data = {
-                "no_solicitud": no_solicitud,
-                "comercial": commercial
-            }
+        col1, col2 = st.columns(2)
 
-            carga_data = {
-                "bl_awb": bl_awb,
-                "tipo_carga": cargo_type,
-                "pol_aol": pol_aol,
-                "pod_aod": pod_aod,
-                "shipper": shipper,
-                "consignee": consignee,
-                "detalle": container_data if cargo_type == "Contenedor" else None,
-                "unidad_medida": unidad_medida if cargo_type != "Contenedor" else None,
-                "cantidad_suelta": cant_suelta if cargo_type != "Contenedor" else None,
-                "referencia": reference
-            }
+        with col1:
 
-            # --- Nuevo armado de ventas_data ---
-            ventas_data = []
-            for block in st.session_state.get("sales_blocks", []):
-                venta_master = {
-                    "cliente": block["client"],
-                    "moneda": block["sales_surcharges"][0]["currency"] if block["sales_surcharges"] else "USD",
-                    "comentarios": block.get("comments", ""),
-                    "detalles": []
+            if st.button("💾 Guardar Orden"):
+                operacion_data = {
+                    "no_solicitud": no_solicitud,
+                    "comercial": commercial
                 }
-                for surcharge in block["sales_surcharges"]:
-                    venta_master["detalles"].append({
-                        "concepto": surcharge["concept"],
-                        "cantidad": surcharge["quantity"],
-                        "tarifa": surcharge["rate"],
-                        "monto": surcharge["total"],
-                        "moneda": surcharge["currency"]
-                    })
-                ventas_data.append(venta_master)
 
-            costos_data = [
-                {
-                    "concepto": c["concept"],
-                    "cantidad": c["quantity"],
-                    "tarifa": c["rate"],
-                    "monto": c["total"],
-                    "moneda": c["currency"],
-                    "comentarios": st.session_state.get("final_comments_cost", "")
+                carga_data = {
+                    "bl_awb": bl_awb,
+                    "tipo_carga": cargo_type,
+                    "pol_aol": pol_aol,
+                    "pod_aod": pod_aod,
+                    "shipper": shipper,
+                    "consignee": consignee,
+                    "detalle": container_data if cargo_type == "Contenedor" else None,
+                    "unidad_medida": unidad_medida if cargo_type != "Contenedor" else None,
+                    "cantidad_suelta": cant_suelta if cargo_type != "Contenedor" else None,
+                    "referencia": reference
                 }
-                for c in st.session_state.get("cost_surcharges", [])
-            ]
 
-            guardar_operacion_completa(operacion_data, carga_data, ventas_data, costos_data)
-            st.success("✅ Orden guardada con éxito.")
+                # --- Nuevo armado de ventas_data ---
+                ventas_data = []
+                for block in st.session_state.get("sales_blocks", []):
+                    venta_master = {
+                        "cliente": block["client"],
+                        "moneda": block["sales_surcharges"][0]["currency"] if block["sales_surcharges"] else "USD",
+                        "comentarios": block.get("comments", ""),
+                        "detalles": []
+                    }
+                    for surcharge in block["sales_surcharges"]:
+                        venta_master["detalles"].append({
+                            "concepto": surcharge["concept"],
+                            "cantidad": surcharge["quantity"],
+                            "tarifa": surcharge["rate"],
+                            "monto": surcharge["total"],
+                            "moneda": surcharge["currency"]
+                        })
+                    ventas_data.append(venta_master)
+
+                costos_data = [
+                    {
+                        "concepto": c["concept"],
+                        "cantidad": c["quantity"],
+                        "tarifa": c["rate"],
+                        "monto": c["total"],
+                        "moneda": c["currency"],
+                        "comentarios": st.session_state.get("final_comments_cost", "")
+                    }
+                    for c in st.session_state.get("cost_surcharges", [])
+                ]
+
+                guardar_operacion_completa(operacion_data, carga_data, ventas_data, costos_data)
+                st.success("✅ Orden guardada con éxito.")
+            
+            with col2:
+                if st.button("🧹 Limpiar Formulario"):
+                    for key in list(st.session_state.keys()):
+                        del st.session_state[key]
+                    st.rerun()

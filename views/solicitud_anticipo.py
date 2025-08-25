@@ -32,26 +32,20 @@ def show():
 
     if st.button('Send Information'):
 
-        errors = validate_request_data(request_data)
+        save_anticipo_submission(request_data)
 
-        if errors:
-            for error in errors:
-                st.error(error)
-        else:
-            save_anticipo_submission(request_data, start_time)
+        st.success("Information saved successfully!")
 
-            st.success("Information saved successfully!")
+        register_new_client(request_data.get("client"), st.session_state["clients_list"])
 
-            register_new_client(request_data.get("client"), st.session_state["clients_list"])
+        pdf_filename = generate_pdf(request_data)
 
-            pdf_filename = generate_pdf(request_data)
+        with open(pdf_filename, "rb") as f:
+            pdf_bytes = f.read()
 
-            with open(pdf_filename, "rb") as f:
-                pdf_bytes = f.read()
-
-            st.download_button(
-                label="Download PDF",
-                data=pdf_bytes,
-                file_name="Solicitud de Anticipo.pdf",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
+        st.download_button(
+            label="Download PDF",
+            data=pdf_bytes,
+            file_name="Solicitud de Anticipo.pdf",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
