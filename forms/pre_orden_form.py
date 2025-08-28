@@ -325,7 +325,7 @@ def forms():
                         st.download_button(
                             label="Descargar Orden de Venta",
                             data=f,                       
-                            file_name=f"ORDEN_{no_solicitud}_{commercial}.pdf",
+                            file_name=f"ORDEN_{no_solicitud}.pdf",
                             mime="application/pdf",
                             key="dl_ventas"
                         )
