@@ -116,6 +116,6 @@ def show():
         if notas_credito_global:
             st.markdown("### 📋 Notas Crédito Registradas")
             df_nc = pd.DataFrame(notas_credito_global)
-            st.dataframe(df_nc, use_container_width=True)
+            st.dataframe(df_nc, width=True)
         else:
             st.info("No hay notas crédito registradas para estas ventas.")
