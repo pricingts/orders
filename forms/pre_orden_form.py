@@ -325,7 +325,7 @@ def forms():
                         st.download_button(
                             label="Descargar Orden de Venta",
                             data=f,                       
-                            file_name=f"ORDEN_{no_solicitud}.pdf",
+                            file_name=f"ORDEN_{no_solicitud}_{commercial}.pdf",
                             mime="application/pdf",
                             key="dl_ventas"
                         )
@@ -428,7 +428,7 @@ def forms():
                     st.download_button(
                         label="Descargar Orden de Costos",
                         data=f,
-                        file_name=f"COSTOS_{st.session_state.get('no_solicitud', '')}.pdf",
+                        file_name=f"COSTOS_{st.session_state.get('no_solicitud', '')}_{commercial}.pdf",
                         mime="application/pdf",
                         key="dl_costos"
                     )
