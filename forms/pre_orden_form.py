@@ -243,18 +243,13 @@ def forms():
                     with col1:
                         surcharge["concept"] = st.text_input(f"Concept*", value=surcharge["concept"], key=f'sale_concept_{block_index}_{i}')
                     with col2:
-                        surcharge["quantity"] = st.number_input(f"Quantity*", value=surcharge["quantity"], min_value=0.0, step=0.01, key=f'sale_quantity_{block_index}_{i}')
+                        surcharge["quantity"] = st.number_input(f"Quantity*", value=surcharge.get("quantity", 0.0), min_value=0.0, step=0.01, key=f'sale_quantity_{block_index}_{i}')
                     with col3:
-                        surcharge["rate"] = st.number_input(f"Rate*", value=surcharge["rate"], min_value=0.0, step=0.01, key=f'sale_rate_{block_index}_{i}')
+                        surcharge["rate"] = st.number_input(f"Rate*", value=surcharge.get("rate", 0.0), min_value=0.0, step=0.01, key=f'sale_rate_{block_index}_{i}')
                     with col4:
                         computed_total = surcharge["rate"] * surcharge["quantity"]
-                        surcharge["total"] = st.number_input(
-                                f"Total*",                
-                                value=float(computed_total),   
-                                min_value=0.0, step=0.01,
-                                key=f'sale_total_{block_index}_{i}',
-                                format="%.2f"
-                            )
+                        surcharge["total"] = computed_total
+                        st.markdown(f"**Total:** {computed_total:,.2f} {surcharge['currency']}")
                     with col5:
                         surcharge["currency"] = st.selectbox(
                             f"Currency*", ['USD', 'COP', 'MXN'],

@@ -14,7 +14,6 @@ credentials = Credentials.from_service_account_info(
     ]
 )
 
-
 client_gcp = gspread.authorize(credentials)
 sheets_service = build("sheets", "v4", credentials=credentials)
 SPREADSHEET_ID = st.secrets["general"]["time_sheet_id"]
