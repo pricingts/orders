@@ -249,7 +249,8 @@ def forms():
                     with col4:
                         computed_total = surcharge["rate"] * surcharge["quantity"]
                         surcharge["total"] = computed_total
-                        st.markdown(f"**Total:** {computed_total:,.2f} {surcharge['currency']}")
+                        st.markdown(f"**Total**")
+                        st.markdown(f"{computed_total:,.2f} {surcharge['currency']}")
                     with col5:
                         surcharge["currency"] = st.selectbox(
                             f"Currency*", ['USD', 'COP', 'MXN'],
