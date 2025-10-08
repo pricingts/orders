@@ -359,13 +359,9 @@ def forms():
 
                 with col4:
                     computed_total = surcharge["rate"] * surcharge["quantity"]
-                    surcharge["total"] = st.number_input(
-                            f"Total*",                        
-                            value=float(computed_total),
-                            min_value=0.0, step=0.01,    
-                            key=f'cost_total_{i}',
-                            format="%.2f"
-                        )
+                    surcharge["total"] = computed_total
+                    st.markdown(f"**Total**")
+                    st.markdown(f"{computed_total:,.2f}")
 
                 with col5:
                     surcharge["currency"] = st.selectbox(
