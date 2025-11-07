@@ -4,5 +4,4 @@ import pytz
 
 
 def show():
-
     order_info = forms()

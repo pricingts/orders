@@ -68,7 +68,7 @@ def forms():
                 with col6:
                     container_op = [
                         "20' Dry Standard", "40' Dry Standard", "40' Dry High Cube", "Reefer 20'",
-                        "Reefer 40'", "Open Top 20'", "Open Top 40'", "Flat Rack 20'", "Flat Rack 40'"
+                        "Reefer 40'", "Open Top 20'", "Open Top 40'", "Flat Rack 20'", "Flat Rack 40'", "45' High Cube Dry"
                     ]
 
                     selected_types = st.multiselect(
